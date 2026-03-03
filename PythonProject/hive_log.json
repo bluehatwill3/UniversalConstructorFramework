@@ -1,0 +1,802 @@
+[
+  {
+    "machine": "CNC-Lathe-01",
+    "cycle": 1,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Forge-Reactor",
+    "cycle": 1,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Swarm-Drone-A",
+    "cycle": 1,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Transport-AGV",
+    "cycle": 1,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Assembly-Arm",
+    "cycle": 1,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "CNC-Lathe-01",
+    "cycle": 2,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Forge-Reactor",
+    "cycle": 2,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Swarm-Drone-A",
+    "cycle": 2,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Transport-AGV",
+    "cycle": 2,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Assembly-Arm",
+    "cycle": 2,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "CNC-Lathe-01",
+    "cycle": 3,
+    "action": "\u2705 Maintain",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Forge-Reactor",
+    "cycle": 3,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Swarm-Drone-A",
+    "cycle": 3,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Transport-AGV",
+    "cycle": 3,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Assembly-Arm",
+    "cycle": 3,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "CNC-Lathe-01",
+    "cycle": 4,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Forge-Reactor",
+    "cycle": 4,
+    "action": "\ud83d\udd25 Ignite",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Swarm-Drone-A",
+    "cycle": 4,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Transport-AGV",
+    "cycle": 4,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Assembly-Arm",
+    "cycle": 4,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "CNC-Lathe-01",
+    "cycle": 5,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Forge-Reactor",
+    "cycle": 5,
+    "action": "\ud83d\udd25 Ignite",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Swarm-Drone-A",
+    "cycle": 5,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Transport-AGV",
+    "cycle": 5,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Assembly-Arm",
+    "cycle": 5,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "CNC-Lathe-01",
+    "cycle": 6,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Forge-Reactor",
+    "cycle": 6,
+    "action": "\ud83d\udd25 Ignite",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Swarm-Drone-A",
+    "cycle": 6,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Transport-AGV",
+    "cycle": 6,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Assembly-Arm",
+    "cycle": 6,
+    "action": "\u27a1\ufe0f Move",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "CNC-Lathe-01",
+    "cycle": 7,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Forge-Reactor",
+    "cycle": 7,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Swarm-Drone-A",
+    "cycle": 7,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Transport-AGV",
+    "cycle": 7,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Assembly-Arm",
+    "cycle": 7,
+    "action": "\u27a1\ufe0f Move",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "CNC-Lathe-01",
+    "cycle": 8,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Forge-Reactor",
+    "cycle": 8,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Swarm-Drone-A",
+    "cycle": 8,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Transport-AGV",
+    "cycle": 8,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Assembly-Arm",
+    "cycle": 8,
+    "action": "\u27a1\ufe0f Move",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "CNC-Lathe-01",
+    "cycle": 9,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Forge-Reactor",
+    "cycle": 9,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Swarm-Drone-A",
+    "cycle": 9,
+    "action": "\ud83d\udc1c Form",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Transport-AGV",
+    "cycle": 9,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Assembly-Arm",
+    "cycle": 9,
+    "action": "\u27a1\ufe0f Move",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "CNC-Lathe-01",
+    "cycle": 10,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Forge-Reactor",
+    "cycle": 10,
+    "action": "\ud83d\udd25 Ignite",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Swarm-Drone-A",
+    "cycle": 10,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Transport-AGV",
+    "cycle": 10,
+    "action": "\u2b06\ufe0f Straight",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Assembly-Arm",
+    "cycle": 10,
+    "action": "\ud83e\udd1d Engage",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "CNC-Lathe-01",
+    "cycle": 11,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Forge-Reactor",
+    "cycle": 11,
+    "action": "\ud83d\udd25 Ignite",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Swarm-Drone-A",
+    "cycle": 11,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Transport-AGV",
+    "cycle": 11,
+    "action": "\u2b06\ufe0f Straight",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Assembly-Arm",
+    "cycle": 11,
+    "action": "\ud83e\udd1d Engage",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "CNC-Lathe-01",
+    "cycle": 12,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Forge-Reactor",
+    "cycle": 12,
+    "action": "\ud83d\udd25 Ignite",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Swarm-Drone-A",
+    "cycle": 12,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Transport-AGV",
+    "cycle": 12,
+    "action": "\u2b06\ufe0f Straight",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Assembly-Arm",
+    "cycle": 12,
+    "action": "\u27a1\ufe0f Move",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "CNC-Lathe-01",
+    "cycle": 13,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Forge-Reactor",
+    "cycle": 13,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Swarm-Drone-A",
+    "cycle": 13,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Transport-AGV",
+    "cycle": 13,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Assembly-Arm",
+    "cycle": 13,
+    "action": "\u27a1\ufe0f Move",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "CNC-Lathe-01",
+    "cycle": 14,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Forge-Reactor",
+    "cycle": 14,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Swarm-Drone-A",
+    "cycle": 14,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Transport-AGV",
+    "cycle": 14,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Assembly-Arm",
+    "cycle": 14,
+    "action": "\u27a1\ufe0f Move",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "CNC-Lathe-01",
+    "cycle": 15,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Forge-Reactor",
+    "cycle": 15,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Swarm-Drone-A",
+    "cycle": 15,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Transport-AGV",
+    "cycle": 15,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Assembly-Arm",
+    "cycle": 15,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "CNC-Lathe-01",
+    "cycle": 16,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Forge-Reactor",
+    "cycle": 16,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Swarm-Drone-A",
+    "cycle": 16,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Transport-AGV",
+    "cycle": 16,
+    "action": "\u2b06\ufe0f Straight",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Assembly-Arm",
+    "cycle": 16,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "CNC-Lathe-01",
+    "cycle": 17,
+    "action": "\ud83d\udd27 Adjust",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Forge-Reactor",
+    "cycle": 17,
+    "action": "\ud83d\udd25 Ignite",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Swarm-Drone-A",
+    "cycle": 17,
+    "action": "\ud83d\udc1c Form",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Transport-AGV",
+    "cycle": 17,
+    "action": "\u2b06\ufe0f Straight",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Assembly-Arm",
+    "cycle": 17,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "CNC-Lathe-01",
+    "cycle": 18,
+    "action": "\u2705 Maintain",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Forge-Reactor",
+    "cycle": 18,
+    "action": "\ud83d\udd25 Ignite",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Swarm-Drone-A",
+    "cycle": 18,
+    "action": "\ud83d\udc1c Form",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Transport-AGV",
+    "cycle": 18,
+    "action": "\u2b06\ufe0f Straight",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Assembly-Arm",
+    "cycle": 18,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "CNC-Lathe-01",
+    "cycle": 19,
+    "action": "\ud83d\udd27 Adjust",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Forge-Reactor",
+    "cycle": 19,
+    "action": "\ud83d\udd25 Ignite",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Swarm-Drone-A",
+    "cycle": 19,
+    "action": "\ud83d\udc1c Form",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Transport-AGV",
+    "cycle": 19,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Assembly-Arm",
+    "cycle": 19,
+    "action": "\u26a0\ufe0f BLOCKED (SAFE)",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "CNC-Lathe-01",
+    "cycle": 20,
+    "action": "\ud83d\udd27 Adjust",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Forge-Reactor",
+    "cycle": 20,
+    "action": "\ud83d\udd25 Ignite",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Swarm-Drone-A",
+    "cycle": 20,
+    "action": "\ud83d\udc1c Form",
+    "safe": true,
+    "reason": "SAFE",
+    "mood": "stable"
+  },
+  {
+    "machine": "Transport-AGV",
+    "cycle": 20,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  },
+  {
+    "machine": "Assembly-Arm",
+    "cycle": 20,
+    "action": "\u26a0\ufe0f BLOCKED (THERMAL_OVERLOAD)",
+    "safe": false,
+    "reason": "THERMAL_OVERLOAD",
+    "mood": "stable"
+  }
+]
