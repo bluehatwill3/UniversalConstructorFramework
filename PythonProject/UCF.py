@@ -215,20 +215,16 @@ class PerceptionPipeline:
 
     @torch.no_grad()
     def perceive(self, bundle: ModalityBundle) -> Tuple[torch.Tensor, torch.Tensor, Dict]:
-        # 1. FIXED: Explicitly check for None to avoid the PyTorch boolean ambiguity
+        # FIXED: Explicitly check for None to avoid the PyTorch boolean ambiguity
         E_i_safe = bundle.E_i if bundle.E_i is not None else torch.zeros(1, 2048)
 
-        # 2. Pass the safe tensor into the HoloSyn projector
         z_t, z_i, z_a, z_v, z_h = self.holosyn(bundle.E_t_aug, E_i_safe, bundle.E_a, bundle.E_v, bundle.H)
-
         raw_scores = self.student_hf(bundle.feat_hf)
         masked = raw_scores * bundle.mask
         logits = torch.where(bundle.mask > 0, torch.log(masked + 1e-9), torch.full_like(masked, -1e9))
         modal_weights = torch.softmax(logits, dim=-1)
-
         w = modal_weights.unsqueeze(-1)
         fused = F.normalize((w * torch.stack([z_t, z_i, z_a, z_v], dim=1)).sum(dim=1), p=2, dim=-1)
-
         return fused, modal_weights, {}
 
     def make_synthetic_bundle(self, seed=None) -> ModalityBundle:
@@ -273,24 +269,43 @@ class NeuromorphicActionHead(nn.Module):
         self.n_actions = n_actions
         self.net = nn.Sequential(nn.Linear(256, 128), nn.ReLU(), nn.Linear(128, n_actions))
 
+    # ── FIXED: Added the required forward method for PyTorch training ──
+    def forward(self, z: torch.Tensor) -> torch.Tensor:
+        return self.net(z)
+    # ───────────────────────────────────────────────────────────────────
+
     @torch.no_grad()
     def predict(self, z: torch.Tensor) -> int:
         if HAS_NEUROMORPHIC:
             b2.start_scope()
-            # FIXED: Changed 'rates' to 'snn_input_rates' to avoid namespace conflict
             snn_input_rates = np.clip(z.squeeze().cpu().numpy(), 0, 1) * 100 * b2.Hz
             P = b2.PoissonGroup(256, rates=snn_input_rates)
             G = b2.NeuronGroup(self.n_actions, 'dv/dt = (I - v) / (10*ms) : 1\nI : 1', threshold='v>1', reset='v=0',
                                refractory=2 * b2.ms, method='exact')
             S = b2.Synapses(P, G, 'w : 1', on_pre='v_post += w')
             S.connect()
-            S.w = 'rand() * 0.1'
+
+            # ── 🧠 THE NEUROMORPHIC BRIDGE ──
+            # Extract the learned weights from the PyTorch layers
+            w1 = self.net[0].weight.abs()  # Input to Hidden (128x256)
+            w2 = self.net[2].weight.abs()  # Hidden to Output (n_actionsx128)
+
+            # Calculate effective direct weights (n_actions x 256)
+            effective_w = torch.matmul(w2, w1)
+
+            # Brian2 expects a flattened array (source 0 to all targets, source 1 to all targets...)
+            w_pt = effective_w.t().contiguous().view(-1).cpu().numpy()
+
+            # Scale down to biologically plausible synaptic voltages
+            S.w = w_pt * 0.05
+            # ────────────────────────────────
+
             M = b2.SpikeMonitor(G)
             b2.run(20 * b2.ms)
             if np.sum(M.count) > 0: return int(np.argmax(M.count))
+
+        # Fallback to pure PyTorch if neurons don't fire or Brian2 is disabled
         return int(self.net(z).argmax(dim=-1).item())
-
-
 # ═════════════════════════════════════════════════════════════════════════════
 #  LAYER 3 — ROBOTS & ECONOMICS
 # ═════════════════════════════════════════════════════════════════════════════
@@ -298,6 +313,9 @@ class NeuromorphicActionHead(nn.Module):
 DOMAINS = {
     "robot_arm": {"n_actions": 2, "action_map": {0: "➡️ Move", 1: "🤝 Engage"}, "emoji": "🦾"},
     "cnc_production": {"n_actions": 3, "action_map": {0: "✅ Maintain", 1: "🔧 Adjust", 2: "⚙️ Swap"}, "emoji": "🏭"},
+    "swarm_coordination": {"n_actions": 3, "action_map": {0: "📡 Sync", 1: "🐜 Form", 2: "🕸️ Disperse"}, "emoji": "🐝"},
+    "self_driving": {"n_actions": 3, "action_map": {0: "⬅️ Steer Left", 1: "⬆️ Straight",  2: "➡️ Steer Right"}, "emoji": "🚗"},
+    "universe_builder": {"n_actions": 3, "action_map": {0: "🌑 Mine", 1: "🔥 Ignite", 2: "🌍 Stabilize"}, "emoji": "🌌"}
 }
 
 
@@ -312,13 +330,150 @@ class ResourceLedger:
         if action_id > 0: self.component_parts += 1
 
 
-class SelfReplicatingRobot:
+# Add this path to your configurations at the top of ucf.py
+BRAIN_DIR = os.path.join(os.path.dirname(__file__), "distilled_brains")
+
+
+class IntelligentMachine:
+    """
+    Represents any AI-driven cyber-physical entity in the Planet Factory.
+    This could be a mobile robot, a stationary CNC machine, or a core reactor.
+    """
+
     def __init__(self, name: str, domain: str, perception: PerceptionPipeline):
-        self.name, self.domain, self.perception = name, domain, perception
+        self.name = name
+        self.domain = domain
+        self.perception = perception
         self.domain_cfg = DOMAINS[domain]
         self.resources = ResourceLedger()
+
+        # Initialize the blank Brain (PyTorch + Brian2 SNN)
         self.action_head = NeuromorphicActionHead(self.domain_cfg["n_actions"])
         self.action_log = []
+
+        # ── NEW: LOAD DISTILLED FOUNDATION WEIGHTS ──
+        self._load_distilled_brain()
+
+    def _load_distilled_brain(self):
+        """Attempts to load pre-trained weights from the distillation engine."""
+        brain_path = os.path.join(BRAIN_DIR, f"{self.domain}_snn_head.pt")
+
+        if os.path.exists(brain_path):
+            try:
+                # Load the PyTorch linear weights
+                state_dict = torch.load(brain_path, map_location=DEVICE, weights_only=True)
+                self.action_head.load_state_dict(state_dict)
+                print(
+                    f"  🧠 [{self.name}] SUCCESS: Distilled VLA brain loaded for {self.domain_cfg['emoji']} {self.domain}.")
+            except Exception as e:
+                print(f"  ⚠️ [{self.name}] WARNING: Failed to load brain ({e}). Using raw instincts.")
+        else:
+            print(f"  🌱 [{self.name}] NOTE: No distilled brain found at {brain_path}. Operating on blank instincts.")
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  LAYER 3.5 — FOUNDATION MODEL DISTILLATION (TEACHER -> STUDENT)
+# ═════════════════════════════════════════════════════════════════════════════
+
+class FoundationTeacherAdapter(nn.Module):
+    """
+    Wraps an open-source HuggingFace robotics model (e.g., OpenVLA, Octo)
+    to act as the Teacher for our lightweight Student robots.
+    """
+
+    def __init__(self, model_name: str = "openvla/openvla-7b", use_mock: bool = True):
+        super().__init__()
+        self.model_name = model_name
+        self.use_mock = use_mock
+
+        if not use_mock:
+            print(f"  📥 Loading Real Foundation Model: {model_name}...")
+            # from transformers import AutoModelForVision2Seq, AutoProcessor
+            # self.processor = AutoProcessor.from_pretrained(model_name, trust_remote_code=True)
+            # self.teacher_model = AutoModelForVision2Seq.from_pretrained(model_name).to(DEVICE)
+        else:
+            print(f"  🧪 Using Mock Foundation Teacher for {model_name} (Fast Simulation)")
+
+    def _map_vla_to_discrete_logits(self, raw_vla_output: str, n_actions: int) -> torch.Tensor:
+        """
+        Translates real Vision-Language-Action textual/continuous output into
+        discrete probability logits for our SNN.
+        """
+        logits = torch.zeros(1, n_actions)
+
+        # Example heuristic mapping for OpenVLA text tokens:
+        raw_text = raw_vla_output.lower()
+        if "move" in raw_text or "forward" in raw_text:
+            logits[0, 0] = 5.0  # High confidence for Action 0
+        elif "engage" in raw_text or "grab" in raw_text or "adjust" in raw_text:
+            logits[0, 1] = 5.0  # High confidence for Action 1
+        elif "swap" in raw_text or "maintain" in raw_text:
+            if n_actions > 2:
+                logits[0, 2] = 5.0  # High confidence for Action 2
+        else:
+            # Uncertain: spread probability evenly
+            logits += 1.0
+
+        return F.log_softmax(logits, dim=-1)
+
+    @torch.no_grad()
+    def get_teacher_action_logits(self, bundle: ModalityBundle, n_actions: int) -> torch.Tensor:
+        """Extracts the 'ground truth' action probabilities from the Foundation Model."""
+        if self.use_mock:
+            # Simulate a confident teacher distribution over the available actions
+            logits = torch.randn(1, n_actions) * 2.0
+            return F.log_softmax(logits, dim=-1)
+        else:
+            # Real VLA inference:
+            # inputs = self.processor(images=bundle.raw_image, text="What action should the robot take?", return_tensors="pt").to(DEVICE)
+            # generated_ids = self.teacher_model.generate(**inputs, max_new_tokens=10)
+            # vla_text_output = self.processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+
+            # Simulated real output for compilation sake
+            vla_text_output = "move arm forward"
+            return self._map_vla_to_discrete_logits(vla_text_output, n_actions)
+
+
+
+
+class RoboticsDistiller:
+    """Orchestrates the transfer of knowledge from the Foundation Model to the SNN Robot."""
+
+    def __init__(self, teacher: FoundationTeacherAdapter):
+        self.teacher = teacher
+
+    def distill_to_robot(self, robot: 'SelfReplicatingRobot', bundles: List[ModalityBundle], epochs: int = 20):
+        print(f"  🧠 Distilling {self.teacher.model_name} into {robot.name}...")
+
+        student_head = robot.action_head
+        student_head.train()
+
+        # Kullback-Leibler Divergence matches the student's probability distribution to the teacher's
+        optimizer = torch.optim.Adam(student_head.parameters(), lr=0.005)
+        loss_fn = nn.KLDivLoss(reduction="batchmean")
+
+        for epoch in range(1, epochs + 1):
+            total_loss = 0.0
+            for bundle in bundles:
+                # 1. Get Teacher target distribution (probabilities)
+                teacher_log_probs = self.teacher.get_teacher_action_logits(bundle, robot.domain_cfg["n_actions"])
+                teacher_probs = torch.exp(teacher_log_probs)
+
+                # 2. Get Student's current distribution (log probabilities)
+                fused_emb, _, _ = robot.perception.perceive(bundle)
+                student_logits = student_head(fused_emb)
+                student_log_probs = F.log_softmax(student_logits, dim=-1)
+
+                # 3. Optimize
+                loss = loss_fn(student_log_probs, teacher_probs)
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+
+                total_loss += loss.item()
+
+        student_head.eval()
+        print(f"     ✅ Distillation Complete. Final Loss: {total_loss / len(bundles):.4f}")
+
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -334,40 +489,50 @@ class UniversalConstructor:
         print("  🌌  UNIVERSAL CONSTRUCTOR — PLANET FACTORY EDITION")
         print("═" * 70)
 
-        # Initialize Safety Core
         self.governor = SafetyGovernor(IndustrialThresholds())
         self.recovery = RecoveryProtocol(cool_down_cycles=3)
 
-        # Initialize Brains
         self.norm = FeatureNormalizer(NORM_JSON)
         self.holosyn = HoloSynHeads()
         self.student_hf = StudentDistilledHeadsHF()
         self.student_basic = StudentDistilledHeadsBasic()
         self.perception = PerceptionPipeline(self.norm, self.holosyn, self.student_hf, self.student_basic)
 
-        # Spawn Alpha Robots
-        self.robots = {
-            "Alpha-Arm": SelfReplicatingRobot("Alpha-Arm", "robot_arm", self.perception),
-            "Alpha-CNC": SelfReplicatingRobot("Alpha-CNC", "cnc_production", self.perception)
+        # ── PROVISION THE CYBER-PHYSICAL FACTORY FLOOR ──
+        print("\n🏭 Provisioning Intelligent Machines...")
+        self.machines = {
+            # Stationary Machinery
+            "CNC-Lathe-01": IntelligentMachine("CNC-Lathe-01", "cnc_production", self.perception),
+            "Forge-Reactor": IntelligentMachine("Forge-Reactor", "universe_builder", self.perception),
+
+            # Mobile/Logistics
+            "Swarm-Drone-A": IntelligentMachine("Swarm-Drone-A", "swarm_coordination", self.perception),
+            "Transport-AGV": IntelligentMachine("Transport-AGV", "self_driving", self.perception),
+
+            # Manipulators
+            "Assembly-Arm": IntelligentMachine("Assembly-Arm", "robot_arm", self.perception)
         }
-        print(f"✅ Planet Factory ready — {len(self.robots)} systems online")
+        print(f"✅ Factory Floor ready — {len(self.machines)} machines online\n")
 
     def run(self):
-        print(f"\n🚀 Starting Safety-Guarded Simulation — {self.n_cycles} cycles")
+        # We completely removed Phase 1 (Distillation) from here because
+        # the weights are now loaded instantly during machine initialization!
+
+        print(f"🚀 Starting Safety-Guarded Simulation — {self.n_cycles} cycles")
 
         for cycle in range(1, self.n_cycles + 1):
-            for name, robot in self.robots.items():
+            for name, machine in self.machines.items():
 
                 # 1. Perception & Prediction
-                bundle = self.perception.make_synthetic_bundle(seed=cycle + id(robot))
+                bundle = self.perception.make_synthetic_bundle(seed=cycle + id(machine))
                 fused_emb, _, _ = self.perception.perceive(bundle)
-                proposed_id = robot.action_head.predict(fused_emb)
+                proposed_id = machine.action_head.predict(fused_emb)
 
                 # 2. Extract Metrics
                 metrics = {
                     "temperature": bundle.meta.get("aud_meta", [0, 0, 0, 0])[2],
                     "vibration": np.std(bundle.H.numpy()),
-                    "energy": robot.resources.energy
+                    "energy": machine.resources.energy
                 }
 
                 # 3. Safety & Recovery Validation
@@ -375,25 +540,23 @@ class UniversalConstructor:
 
                 if self.recovery.check_recovery(name, is_safe):
                     final_id = proposed_id
-                    action_name = robot.domain_cfg["action_map"].get(final_id, "Unknown")
+                    action_name = machine.domain_cfg["action_map"].get(final_id, "Unknown")
                 else:
                     final_id = 0
                     action_name = f"⚠️ BLOCKED ({reason})"
 
                 # 4. Execute & Log
-                robot.resources.update_for_action(final_id)
+                machine.resources.update_for_action(final_id)
                 sentiment = QuantumSentiment.from_embedding(fused_emb)
 
                 log_entry = {"cycle": cycle, "action": action_name, "safe": is_safe, "reason": reason,
                              "mood": sentiment.mood}
-                robot.action_log.append(log_entry)
-                self.hive_log.append({"robot": name, **log_entry})
+                machine.action_log.append(log_entry)
+                self.hive_log.append({"machine": name, **log_entry})
 
                 if self.verbose:
                     print(
-                        f"  Cycle {cycle:03d} | {robot.domain_cfg['emoji']} {name:<12} | {action_name:<20} | Temp: {metrics['temperature']:.1f}°C")
-
-
+                        f"  Cycle {cycle:03d} | {machine.domain_cfg['emoji']} {name:<15} | {action_name:<20} | Temp: {metrics['temperature']:.1f}°C")
 # ═════════════════════════════════════════════════════════════════════════════
 #  ENTRY POINT
 # ═════════════════════════════════════════════════════════════════════════════
@@ -401,3 +564,9 @@ class UniversalConstructor:
 if __name__ == "__main__":
     uc = UniversalConstructor(n_cycles=20)
     uc.run()
+
+    # ADD THESE TWO LINES TO SAVE THE DATA:
+    import json
+
+    with open("hive_log.json", "w") as f:
+        json.dump(uc.hive_log, f, indent=2)
