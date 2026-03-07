@@ -1,0 +1,71 @@
+{
+  "name": "Hue Serenity",
+  "description": "A luminous garden vision where a living rainbow descends from celestial light, threading through ancient wood, cascading water steps, and an eden of roses and lavender. The spectrum is not above the world — it is of it, flowing through the earth like breath. Part of the Paddy Spectrum series — still water, moving light.",
+  "image": "ipfs://<YOUR_IPFS_CID_HERE>",
+  "external_url": "https://paddyspectrum.art/hueserenity",
+  "background_color": "B8DFF5",
+  "attributes": [
+    {
+      "trait_type": "Series",
+      "value": "Paddy Spectrum"
+    },
+    {
+      "trait_type": "Medium",
+      "value": "Digital Painting"
+    },
+    {
+      "trait_type": "Style",
+      "value": "Luminous Realism"
+    },
+    {
+      "trait_type": "Palette",
+      "value": "Full Spectrum"
+    },
+    {
+      "trait_type": "Primary Color",
+      "value": "Rainbow Arc"
+    },
+    {
+      "trait_type": "Mood",
+      "value": "Serenity"
+    },
+    {
+      "trait_type": "Season",
+      "value": "Late Spring"
+    },
+    {
+      "trait_type": "Elements",
+      "value": "Water, Light, Earth, Flora"
+    },
+    {
+      "trait_type": "Flora",
+      "value": "Roses, Lavender, Peonies, Wildflowers"
+    },
+    {
+      "trait_type": "Light Source",
+      "value": "Solar Burst"
+    },
+    {
+      "trait_type": "Water Feature",
+      "value": "Cascading Stream"
+    },
+    {
+      "trait_type": "Celestial",
+      "value": "Rainbow + Sun Rays"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "1 of 1"
+    },
+    {
+      "display_type": "number",
+      "trait_type": "Edition",
+      "value": 1
+    },
+    {
+      "display_type": "date",
+      "trait_type": "Creation Date",
+      "value": 1739404800
+    }
+  ]
+}
