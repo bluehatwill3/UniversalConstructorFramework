@@ -1,0 +1,1 @@
+[model] cycle=1 mood=stable. classical(H=0.595, M=0.443, S=0.332) quantum(H=0.240, M=0.264, S=0.256).

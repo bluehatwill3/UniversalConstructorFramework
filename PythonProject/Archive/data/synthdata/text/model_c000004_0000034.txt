@@ -1,0 +1,1 @@
+[model] cycle=4 mood=drifting. classical(H=0.561, M=0.769, S=0.534) quantum(H=0.424, M=0.416, S=0.208).

@@ -1,0 +1,1 @@
+[cookie] cycle=3 mood=stable. classical(H=0.710, M=0.517, S=0.342) quantum(H=0.200, M=0.256, S=0.256).

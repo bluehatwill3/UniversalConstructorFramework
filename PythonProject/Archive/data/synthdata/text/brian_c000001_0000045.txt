@@ -1,0 +1,1 @@
+[brian] cycle=1 mood=stable. classical(H=0.733, M=0.684, S=0.291) quantum(H=0.336, M=0.320, S=0.280).

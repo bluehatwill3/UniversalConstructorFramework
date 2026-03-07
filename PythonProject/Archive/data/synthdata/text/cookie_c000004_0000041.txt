@@ -1,0 +1,1 @@
+[cookie] cycle=4 mood=drifting. classical(H=0.518, M=0.561, S=0.641) quantum(H=0.296, M=0.248, S=0.248).

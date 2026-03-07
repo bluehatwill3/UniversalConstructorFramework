@@ -1,0 +1,1 @@
+[client] cycle=3 mood=drifting. classical(H=0.786, M=0.485, S=0.733) quantum(H=0.208, M=0.240, S=0.240).
