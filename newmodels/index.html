@@ -1,0 +1,2380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cBloom — The Autonomous Industrial OS</title>
+  <meta name="description" content="cBloom is the operating system powering autonomous factories and robotics fleets. One unified platform connecting every machine, adding intelligence, and deploying itself." />
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2300FF88'/%3E%3Cstop offset='100%25' stop-color='%2300D4AA'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='45' fill='url(%23g)'/%3E%3Ctext x='50' y='65' font-family='system-ui' font-weight='700' font-size='45' fill='%23001a0f' text-anchor='middle'%3Ec%3C/text%3E%3C/svg%3E" />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-deep: #010804;
+      --bg-dark: #020c07;
+      --bg-card: rgba(0, 255, 136, 0.02);
+      --accent-primary: #00FF88;
+      --accent-secondary: #00D4AA;
+      --accent-tertiary: #7B61FF;
+      --accent-warm: #FFB800;
+      --text-primary: #F0FDF4;
+      --text-secondary: #86EFAC;
+      --text-muted: #4ADE80;
+      --text-dim: rgba(134, 239, 172, 0.5);
+      --border-subtle: rgba(0, 255, 136, 0.08);
+      --border-hover: rgba(0, 255, 136, 0.25);
+      --glow-primary: 0 0 60px rgba(0, 255, 136, 0.15);
+      --glow-intense: 0 0 80px rgba(0, 255, 136, 0.3), 0 0 120px rgba(0, 212, 170, 0.15);
+    }
+
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Typography */
+    h1, h2, h3, h4 {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-weight: 400;
+      line-height: 1.1;
+    }
+
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Layout */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 0 1.25rem; }
+    }
+
+    /* Animated Background */
+    .bg-pattern {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: 
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 255, 136, 0.08), transparent),
+        radial-gradient(ellipse 60% 40% at 100% 50%, rgba(123, 97, 255, 0.04), transparent),
+        radial-gradient(ellipse 50% 30% at 0% 80%, rgba(0, 212, 170, 0.05), transparent);
+    }
+
+    .grid-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image: 
+        linear-gradient(rgba(0, 255, 136, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 136, 0.015) 1px, transparent 1px);
+      background-size: 80px 80px;
+      mask-image: radial-gradient(ellipse 70% 70% at 50% 30%, black, transparent);
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 1.25rem 0;
+      background: rgba(1, 8, 4, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+      transition: all 0.3s ease;
+    }
+
+    nav.scrolled {
+      padding: 0.75rem 0;
+      background: rgba(1, 8, 4, 0.95);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+    }
+
+    .logo-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.5rem;
+      font-style: italic;
+      color: var(--bg-deep);
+      font-weight: 400;
+      box-shadow: var(--glow-primary);
+    }
+
+    .logo-text {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      font-style: italic;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent-primary);
+    }
+
+    .nav-cta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      color: var(--bg-deep);
+      box-shadow: var(--glow-primary);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--glow-intense);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-hover);
+      color: var(--accent-primary);
+    }
+
+    .btn-outline:hover {
+      background: rgba(0, 255, 136, 0.08);
+      border-color: var(--accent-primary);
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 8rem 0 6rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .hero-badge .pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.4); }
+      50% { box-shadow: 0 0 0 12px rgba(0, 255, 136, 0); }
+    }
+
+    .hero-badge span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .hero h1 {
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      margin-bottom: 1.5rem;
+      max-width: 900px;
+    }
+
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      max-width: 640px;
+      margin-bottom: 0.75rem;
+      line-height: 1.7;
+    }
+
+    .hero-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 4rem;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      max-width: 800px;
+    }
+
+    @media (max-width: 768px) {
+      .hero-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--glow-primary);
+    }
+
+    .stat-value {
+      font-family: 'Instrument Serif', serif;
+      font-size: 2rem;
+      color: var(--accent-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* Section Styles */
+    section {
+      padding: 8rem 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent-primary);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-label::before {
+      content: '//';
+      opacity: 0.5;
+    }
+
+    .section-title {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      margin-bottom: 1.5rem;
+      max-width: 800px;
+    }
+
+    .section-desc {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      line-height: 1.7;
+    }
+
+    /* Problem Section */
+    #problem {
+      background: linear-gradient(180deg, transparent, rgba(255, 68, 68, 0.02), transparent);
+    }
+
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-top: 4rem;
+    }
+
+    @media (max-width: 768px) {
+      .problem-grid { grid-template-columns: 1fr; }
+    }
+
+    .problem-card {
+      background: rgba(255, 68, 68, 0.03);
+      border: 1px solid rgba(255, 68, 68, 0.1);
+      border-radius: 12px;
+      padding: 2rem;
+      transition: all 0.3s ease;
+    }
+
+    .problem-card:hover {
+      border-color: rgba(255, 68, 68, 0.3);
+      transform: translateY(-4px);
+    }
+
+    .problem-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 68, 68, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .problem-stat {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .problem-title {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+    }
+
+    .problem-desc {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Solution Section */
+    .pillars {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin-top: 4rem;
+    }
+
+    @media (max-width: 900px) {
+      .pillars { grid-template-columns: 1fr; }
+    }
+
+    .pillar {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s ease;
+    }
+
+    .pillar:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-8px);
+      box-shadow: var(--glow-primary);
+    }
+
+    .pillar-number {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      font-family: 'Instrument Serif', serif;
+      font-size: 4rem;
+      color: var(--accent-primary);
+      opacity: 0.06;
+      font-style: italic;
+    }
+
+    .pillar-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .pillar-icon.green { background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.2); }
+    .pillar-icon.purple { background: rgba(123, 97, 255, 0.1); border: 1px solid rgba(123, 97, 255, 0.2); }
+    .pillar-icon.cyan { background: rgba(0, 212, 170, 0.1); border: 1px solid rgba(0, 212, 170, 0.2); }
+
+    .pillar h3 {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      font-size: 1.35rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .pillar-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-bottom: 1rem;
+    }
+
+    .pillar p {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+
+    .pillar-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .pillar-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      background: rgba(0, 255, 136, 0.05);
+      border: 1px solid rgba(0, 255, 136, 0.15);
+      color: var(--accent-primary);
+    }
+
+    /* Architecture Section */
+    .arch-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      margin-top: 4rem;
+      align-items: start;
+    }
+
+    @media (max-width: 1000px) {
+      .arch-grid { grid-template-columns: 1fr; }
+    }
+
+    .stack-layers {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .layer {
+      border-radius: 10px;
+      padding: 1.5rem;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .layer::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      border-radius: 10px 0 0 10px;
+    }
+
+    .layer.green { background: rgba(0, 255, 136, 0.04); border: 1px solid rgba(0, 255, 136, 0.15); }
+    .layer.green::before { background: var(--accent-primary); }
+    .layer.purple { background: rgba(123, 97, 255, 0.04); border: 1px solid rgba(123, 97, 255, 0.15); }
+    .layer.purple::before { background: var(--accent-tertiary); }
+    .layer.cyan { background: rgba(0, 212, 170, 0.04); border: 1px solid rgba(0, 212, 170, 0.15); }
+    .layer.cyan::before { background: var(--accent-secondary); }
+    .layer.orange { background: rgba(255, 184, 0, 0.04); border: 1px solid rgba(255, 184, 0, 0.15); }
+    .layer.orange::before { background: var(--accent-warm); }
+
+    .layer:hover {
+      transform: translateX(8px);
+    }
+
+    .layer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .layer-name {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .layer-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .layer.green .layer-tag { color: var(--accent-primary); }
+    .layer.purple .layer-tag { color: var(--accent-tertiary); }
+    .layer.cyan .layer-tag { color: var(--accent-secondary); }
+    .layer.orange .layer-tag { color: var(--accent-warm); }
+
+    .layer-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .layer-item {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      padding: 0.3rem 0.6rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 4px;
+      color: var(--text-secondary);
+    }
+
+    .compare-table {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .compare-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .compare-table th,
+    .compare-table td {
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .compare-table th {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .compare-table th:first-child {
+      text-align: left;
+    }
+
+    .compare-table td:first-child {
+      text-align: left;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .compare-table td {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+    }
+
+    .compare-table .yes { color: var(--accent-primary); }
+    .compare-table .no { color: rgba(255, 68, 68, 0.7); }
+    .compare-table .maybe { color: var(--accent-warm); }
+
+    .compare-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .compare-table tr:hover td {
+      background: rgba(0, 255, 136, 0.02);
+    }
+
+    /* Traction Section */
+    .traction-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 4rem;
+    }
+
+    @media (max-width: 900px) {
+      .traction-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .traction-grid { grid-template-columns: 1fr; }
+    }
+
+    .traction-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 1.75rem;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .traction-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-4px);
+    }
+
+    .traction-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(0, 255, 136, 0.08);
+      border: 1px solid rgba(0, 255, 136, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .traction-check {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      color: var(--accent-primary);
+    }
+
+    .traction-stat {
+      font-family: 'Instrument Serif', serif;
+      font-size: 2rem;
+      color: var(--accent-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .traction-label {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .traction-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Market Section */
+    #market {
+      background: linear-gradient(180deg, transparent, rgba(0, 255, 136, 0.02), transparent);
+    }
+
+    .market-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin-top: 4rem;
+    }
+
+    @media (max-width: 900px) {
+      .market-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .market-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .market-card:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--glow-primary);
+    }
+
+    .market-value {
+      font-family: 'Instrument Serif', serif;
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .market-label {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .market-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-dim);
+    }
+
+    .use-cases {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-top: 4rem;
+    }
+
+    @media (max-width: 900px) {
+      .use-cases { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .use-cases { grid-template-columns: 1fr; }
+    }
+
+    .use-case {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .use-case:hover {
+      border-color: var(--border-hover);
+    }
+
+    .use-case-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+
+    .use-case h4 {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .use-case-metric {
+      text-align: right;
+    }
+
+    .use-case-value {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.25rem;
+      color: var(--accent-primary);
+    }
+
+    .use-case-unit {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.55rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .use-case p {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Roadmap Section */
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      margin-top: 4rem;
+      position: relative;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 2rem;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary), var(--accent-warm));
+      opacity: 0.3;
+    }
+
+    @media (max-width: 900px) {
+      .timeline { grid-template-columns: repeat(2, 1fr); }
+      .timeline::before { display: none; }
+    }
+
+    @media (max-width: 600px) {
+      .timeline { grid-template-columns: 1fr; }
+    }
+
+    .timeline-item {
+      position: relative;
+    }
+
+    .timeline-dot {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .timeline-dot.complete { background: rgba(0, 255, 136, 0.1); border: 2px solid var(--accent-primary); box-shadow: var(--glow-primary); }
+    .timeline-dot.active { background: rgba(0, 212, 170, 0.1); border: 2px solid var(--accent-secondary); }
+    .timeline-dot.upcoming { background: rgba(123, 97, 255, 0.1); border: 2px solid var(--accent-tertiary); }
+    .timeline-dot.future { background: rgba(255, 184, 0, 0.1); border: 2px solid var(--accent-warm); }
+
+    .timeline-phase {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.25rem;
+    }
+
+    .timeline-item:nth-child(1) .timeline-phase { color: var(--accent-primary); }
+    .timeline-item:nth-child(2) .timeline-phase { color: var(--accent-secondary); }
+    .timeline-item:nth-child(3) .timeline-phase { color: var(--accent-tertiary); }
+    .timeline-item:nth-child(4) .timeline-phase { color: var(--accent-warm); }
+
+    .timeline-title {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .timeline-list {
+      list-style: none;
+    }
+
+    .timeline-list li {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+      padding-left: 1rem;
+      position: relative;
+    }
+
+    .timeline-list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.5em;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--text-dim);
+    }
+
+    /* Business Model */
+    .biz-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    @media (max-width: 768px) {
+      .biz-grid { grid-template-columns: 1fr; }
+    }
+
+    .biz-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .biz-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .biz-card:nth-child(1)::before { background: linear-gradient(90deg, var(--accent-primary), transparent); }
+    .biz-card:nth-child(2)::before { background: linear-gradient(90deg, var(--accent-secondary), transparent); }
+    .biz-card:nth-child(3)::before { background: linear-gradient(90deg, var(--accent-tertiary), transparent); }
+
+    .biz-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-4px);
+    }
+
+    .biz-title {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .biz-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .biz-card:nth-child(1) .biz-sub { color: var(--accent-primary); }
+    .biz-card:nth-child(2) .biz-sub { color: var(--accent-secondary); }
+    .biz-card:nth-child(3) .biz-sub { color: var(--accent-tertiary); }
+
+    .biz-desc {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Founder Section */
+    #founder {
+      background: linear-gradient(180deg, transparent, rgba(123, 97, 255, 0.02), transparent);
+    }
+
+    .founder-grid {
+      display: grid;
+      grid-template-columns: 2fr 3fr;
+      gap: 4rem;
+      margin-top: 4rem;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .founder-grid { grid-template-columns: 1fr; }
+    }
+
+    .founder-avatar {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      margin-bottom: 1.5rem;
+    }
+
+    .founder-avatar::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border: 2px solid var(--accent-primary);
+      border-radius: 16px;
+      transform: rotate(6deg);
+      opacity: 0.4;
+    }
+
+    .founder-avatar::after {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border: 1px solid var(--accent-secondary);
+      border-radius: 16px;
+      transform: rotate(-3deg);
+      opacity: 0.2;
+    }
+
+    .founder-avatar-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 170, 0.1));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .founder-avatar-inner span {
+      font-family: 'Instrument Serif', serif;
+      font-size: 2.5rem;
+      color: var(--accent-primary);
+      font-style: italic;
+    }
+
+    .founder-avatar .online {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 16px;
+      height: 16px;
+      background: var(--accent-primary);
+      border-radius: 50%;
+      border: 3px solid var(--bg-deep);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .founder-name {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.75rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .founder-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent-primary);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .founder-location {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      margin-bottom: 1.5rem;
+    }
+
+    .founder-bio {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+
+    .founder-quote {
+      border-left: 2px solid var(--accent-primary);
+      padding-left: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .founder-quote p {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1rem;
+      font-style: italic;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .founder-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .founder-links a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .founder-links a:hover {
+      color: var(--accent-primary);
+    }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    @media (max-width: 600px) {
+      .skills-grid { grid-template-columns: 1fr; }
+    }
+
+    .skill-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 1.25rem;
+    }
+
+    .skill-cat {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent-primary);
+      margin-bottom: 0.75rem;
+    }
+
+    .skill-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .skill-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      padding: 0.25rem 0.5rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 4px;
+      color: var(--text-secondary);
+    }
+
+    .awards {
+      margin-top: 2rem;
+    }
+
+    .award {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .award-icon {
+      color: var(--accent-warm);
+      flex-shrink: 0;
+    }
+
+    .award-title {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .award-org {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+    }
+
+    .award-badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.55rem;
+      padding: 0.2rem 0.5rem;
+      background: rgba(255, 184, 0, 0.1);
+      border-radius: 4px;
+      color: var(--accent-warm);
+    }
+
+    /* Contact Section */
+    #contact {
+      background: linear-gradient(180deg, transparent, rgba(0, 255, 136, 0.03));
+    }
+
+    .contact-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .contact-header .section-title {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .contact-header .section-desc {
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 700px;
+    }
+
+    .asks-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin-bottom: 4rem;
+    }
+
+    @media (max-width: 900px) {
+      .asks-grid { grid-template-columns: 1fr; }
+    }
+
+    .ask-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .ask-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .ask-card:nth-child(1)::before { background: var(--accent-secondary); }
+    .ask-card:nth-child(2)::before { background: var(--accent-tertiary); }
+    .ask-card:nth-child(3)::before { background: var(--accent-primary); }
+
+    .ask-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-8px);
+      box-shadow: var(--glow-primary);
+    }
+
+    .ask-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .ask-card:nth-child(1) .ask-icon { background: rgba(0, 212, 170, 0.1); border: 1px solid rgba(0, 212, 170, 0.2); color: var(--accent-secondary); }
+    .ask-card:nth-child(2) .ask-icon { background: rgba(123, 97, 255, 0.1); border: 1px solid rgba(123, 97, 255, 0.2); color: var(--accent-tertiary); }
+    .ask-card:nth-child(3) .ask-icon { background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.2); color: var(--accent-primary); }
+
+    .ask-title {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      font-size: 1.25rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .ask-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+
+    .ask-card:nth-child(1) .ask-sub { color: var(--accent-secondary); }
+    .ask-card:nth-child(2) .ask-sub { color: var(--accent-tertiary); }
+    .ask-card:nth-child(3) .ask-sub { color: var(--accent-primary); }
+
+    .ask-list {
+      list-style: none;
+    }
+
+    .ask-list li {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.6rem;
+      padding-left: 1rem;
+      position: relative;
+    }
+
+    .ask-list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.55em;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+    }
+
+    .ask-card:nth-child(1) .ask-list li::before { background: var(--accent-secondary); }
+    .ask-card:nth-child(2) .ask-list li::before { background: var(--accent-tertiary); }
+    .ask-card:nth-child(3) .ask-list li::before { background: var(--accent-primary); }
+
+    .contact-box {
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      border-radius: 16px;
+      padding: 3rem;
+      text-align: center;
+    }
+
+    .contact-box h3 {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .contact-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+    }
+
+    .contact-links a {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .contact-links a:hover {
+      color: var(--accent-primary);
+    }
+
+    .contact-links svg {
+      color: var(--accent-primary);
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 3rem 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-inner {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .footer-logo-mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Instrument Serif', serif;
+      font-size: 1rem;
+      font-style: italic;
+      color: var(--bg-deep);
+    }
+
+    .footer-logo span {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      color: var(--text-primary);
+    }
+
+    .footer-logo small {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--text-dim);
+      margin-left: 0.5rem;
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .footer-links a {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent-primary);
+    }
+
+    .footer-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .footer-status .pulse {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .footer-status span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-dim);
+    }
+
+    .footer-bottom {
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .footer-bottom p {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--text-dim);
+      opacity: 0.5;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-in {
+      animation: fadeInUp 0.8s ease forwards;
+    }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+
+    /* SVG Icons inline */
+    .icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .icon-sm {
+      width: 16px;
+      height: 16px;
+    }
+
+    .icon-lg {
+      width: 24px;
+      height: 24px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Background Elements -->
+  <div class="bg-pattern"></div>
+  <div class="grid-overlay"></div>
+
+  <!-- Navigation -->
+  <nav id="navbar">
+    <div class="container nav-inner">
+      <a href="#" class="logo">
+        <div class="logo-mark">c</div>
+        <span class="logo-text">cBloom</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#problem">Problem</a></li>
+        <li><a href="#solution">Solution</a></li>
+        <li><a href="#architecture">Architecture</a></li>
+        <li><a href="#market">Market</a></li>
+        <li><a href="#roadmap">Roadmap</a></li>
+        <li><a href="#founder">Founder</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="https://github.com/bluehatwill3" target="_blank" rel="noopener" class="btn btn-outline">
+          <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z" fill="currentColor"/></svg>
+          GitHub
+        </a>
+        <a href="#contact" class="btn btn-primary">Partner With Us</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge animate-in">
+        <div class="pulse"></div>
+        <span>Live Prototype · Open Source · Seeking Partners</span>
+      </div>
+      
+      <h1 class="animate-in delay-1">
+        The <span class="highlight">Autonomous</span><br>Industrial OS
+      </h1>
+      
+      <p class="hero-sub animate-in delay-2">
+        cBloom is the operating system powering <strong>autonomous factories</strong> and <strong>robotics fleets</strong>. One unified platform connecting every machine, adding intelligence, and deploying itself.
+      </p>
+      
+      <p class="hero-meta animate-in delay-2">
+        github.com/bluehatwill3 · Brampton, ON · Open to accelerators · investors · partners
+      </p>
+      
+      <div class="hero-actions animate-in delay-3">
+        <a href="https://github.com/bluehatwill3" target="_blank" rel="noopener" class="btn btn-primary">
+          <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z" fill="currentColor"/></svg>
+          Explore the Code
+        </a>
+        <a href="#contact" class="btn btn-outline">
+          <svg class="icon-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+          Partner With Us
+        </a>
+      </div>
+      
+      <div class="hero-stats animate-in delay-4">
+        <div class="stat-card">
+          <div class="stat-value">70+</div>
+          <div class="stat-label">ROS2 Modules Live</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">5</div>
+          <div class="stat-label">Digital Twin Envs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">$500B+</div>
+          <div class="stat-label">Target Market</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">2023</div>
+          <div class="stat-label">Prototype Since</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem Section -->
+  <section id="problem">
+    <div class="container">
+      <div class="section-label">01 — The Problem</div>
+      <h2 class="section-title">Industrial Automation<br><span style="color: #FF6B6B;">Is Broken.</span></h2>
+      <p class="section-desc">Every factory. Every time. The same four failures repeat across the industry — costing billions and blocking progress.</p>
+      
+      <div class="problem-grid">
+        <div class="problem-card">
+          <div class="problem-icon">
+            <svg class="icon-lg" fill="none" stroke="#FF6B6B" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01"/></svg>
+          </div>
+          <div class="problem-stat" style="color: #FF6B6B;">$260K/hr</div>
+          <div class="problem-title">Unplanned Downtime</div>
+          <p class="problem-desc">Static systems can't self-diagnose or recover. One line stoppage costs a quarter-million dollars every single hour.</p>
+        </div>
+        
+        <div class="problem-card">
+          <div class="problem-icon">
+            <svg class="icon-lg" fill="none" stroke="#FFA94D" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          </div>
+          <div class="problem-stat" style="color: #FFA94D;">Siloed</div>
+          <div class="problem-title">Fragmented Systems</div>
+          <p class="problem-desc">Robot arms, CNC, and AVs run on separate, incompatible stacks. No shared intelligence — constant duplication of effort.</p>
+        </div>
+        
+        <div class="problem-card">
+          <div class="problem-icon">
+            <svg class="icon-lg" fill="none" stroke="#FFD43B" stroke-width="2" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+          </div>
+          <div class="problem-stat" style="color: #FFD43B;">3–5 yrs</div>
+          <div class="problem-title">Rip-and-Replace Cycles</div>
+          <p class="problem-desc">Proprietary platforms trap companies in expensive upgrade cycles. One firmware bump can cost hundreds of thousands.</p>
+        </div>
+        
+        <div class="problem-card">
+          <div class="problem-icon">
+            <svg class="icon-lg" fill="none" stroke="#FF8C42" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a4 4 0 014 4v2a4 4 0 01-8 0V6a4 4 0 014-4zM16 12a4 4 0 014 4v2a4 4 0 01-8 0v-2a4 4 0 014-4zM8 12a4 4 0 014 4v2a4 4 0 01-8 0v-2a4 4 0 014-4z"/></svg>
+          </div>
+          <div class="problem-stat" style="color: #FF8C42;">Rigid</div>
+          <div class="problem-title">AI That Can't Adapt</div>
+          <p class="problem-desc">Conventional automation follows rigid rules. It breaks the moment conditions change — which is every day on a factory floor.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Solution Section -->
+  <section id="solution">
+    <div class="container">
+      <div class="section-label">02 — The Solution</div>
+      <h2 class="section-title">One OS. <span class="highlight">Every Machine.</span><br>Infinite Scale.</h2>
+      <p class="section-desc">cBloom connects, intelligentizes, and self-replicates across any industrial fleet. Three pillars. One unified platform.</p>
+      
+      <div class="pillars">
+        <div class="pillar">
+          <div class="pillar-number">01</div>
+          <div class="pillar-icon green">
+            <svg class="icon-lg" fill="none" stroke="var(--accent-primary)" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          </div>
+          <h3>Connect Everything</h3>
+          <div class="pillar-sub">ROS2 — the universal machine language</div>
+          <p>A single ROS2-native control plane links robot arms, CNC, AVs, and buildings. Compatible with virtually any industrial hardware — no vendor lock-in.</p>
+          <div class="pillar-tags">
+            <span class="pillar-tag">ROS2</span>
+            <span class="pillar-tag">Multi-Robot</span>
+            <span class="pillar-tag">Cross-Domain</span>
+          </div>
+        </div>
+        
+        <div class="pillar">
+          <div class="pillar-number">02</div>
+          <div class="pillar-icon purple">
+            <svg class="icon-lg" fill="none" stroke="var(--accent-tertiary)" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a4 4 0 014 4c0 1.1-.9 2-2 2h-4a2 2 0 01-2-2 4 4 0 014-4z"/><path d="M12 8v14"/><path d="M5 13h14"/><circle cx="12" cy="12" r="10"/></svg>
+          </div>
+          <h3>Add Intelligence</h3>
+          <div class="pillar-sub">Neuromorphic AI + Quantum Optimization</div>
+          <p>Brian2 spiking neural networks make real-time decisions in microseconds. Google Cirq handles complex scheduling that classical computers can't solve at speed.</p>
+          <div class="pillar-tags">
+            <span class="pillar-tag" style="border-color: rgba(123,97,255,0.3); color: var(--accent-tertiary);">Brian2 SNN</span>
+            <span class="pillar-tag" style="border-color: rgba(123,97,255,0.3); color: var(--accent-tertiary);">Google Cirq</span>
+            <span class="pillar-tag" style="border-color: rgba(123,97,255,0.3); color: var(--accent-tertiary);">Edge AI</span>
+          </div>
+        </div>
+        
+        <div class="pillar">
+          <div class="pillar-number">03</div>
+          <div class="pillar-icon cyan">
+            <svg class="icon-lg" fill="none" stroke="var(--accent-secondary)" stroke-width="2" viewBox="0 0 24 24"><path d="M18.178 8c5.096 0 5.096 8 0 8-5.095 0-7.133-8-12.739-8-4.585 0-4.585 8 0 8 5.606 0 7.644-8 12.74-8z"/></svg>
+          </div>
+          <h3>Deploy & Self-Replicate</h3>
+          <div class="pillar-sub">Zero-touch scale from one node to thousands</div>
+          <p>TorchScript distillation compresses learned behaviors into portable models. New machines boot pre-loaded with the entire system's intelligence — no manual re-programming.</p>
+          <div class="pillar-tags">
+            <span class="pillar-tag" style="border-color: rgba(0,212,170,0.3); color: var(--accent-secondary);">TorchScript</span>
+            <span class="pillar-tag" style="border-color: rgba(0,212,170,0.3); color: var(--accent-secondary);">Zero-Touch</span>
+            <span class="pillar-tag" style="border-color: rgba(0,212,170,0.3); color: var(--accent-secondary);">Self-Replicating</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Traction Section -->
+  <section id="traction">
+    <div class="container">
+      <div class="section-label">03 — Prototype Traction</div>
+      <h2 class="section-title">Not a Concept.<br><span class="highlight">Already Deployed.</span></h2>
+      <p class="section-desc">Every module is live, documented, and open source. This is a post-prototype raise.</p>
+      
+      <div class="traction-grid">
+        <div class="traction-card">
+          <div class="traction-icon">
+            <svg class="icon" fill="none" stroke="var(--accent-primary)" stroke-width="2" viewBox="0 0 24 24"><path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6zM6 21a3 3 0 100-6 3 3 0 000 6zM18 9a9 9 0 01-9 9"/></svg>
+          </div>
+          <svg class="traction-check icon-sm" fill="var(--accent-primary)" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3" fill="none" stroke="var(--accent-primary)" stroke-width="2"/></svg>
+          <div class="traction-stat">70+</div>
+          <div class="traction-label">ROS2 Modules</div>
+          <p class="traction-desc">Production-grade nodes for robot arms, CNC, AVs, and facilities — live on GitHub.</p>
+        </div>
+        
+        <div class="traction-card">
+          <div class="traction-icon">
+            <svg class="icon" fill="none" stroke="var(--accent-secondary)" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg>
+          </div>
+          <svg class="traction-check icon-sm" fill="var(--accent-primary)" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3" fill="none" stroke="var(--accent-primary)" stroke-width="2"/></svg>
+          <div class="traction-stat" style="color: var(--accent-secondary);">Brian2</div>
+          <div class="traction-label">Neuromorphic AI</div>
+          <p class="traction-desc">SNN controllers running microsecond adaptive control in simulation. No cloud lag.</p>
+        </div>
+        
+        <div class="traction-card">
+          <div class="traction-icon">
+            <svg class="icon" fill="none" stroke="var(--accent-tertiary)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <svg class="traction-check icon-sm" fill="var(--accent-primary)" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3" fill="none" stroke="var(--accent-primary)" stroke-width="2"/></svg>
+          <div class="traction-stat" style="color: var(--accent-tertiary);">Cirq</div>
+          <div class="traction-label">Quantum Scheduler</div>
+          <p class="traction-desc">Cirq-based optimizer for fleet routing, outperforming classical solvers.</p>
+        </div>
+        
+        <div class="traction-card">
+          <div class="traction-icon">
+            <svg class="icon" fill="none" stroke="var(--accent-secondary)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          </div>
+          <svg class="traction-check icon-sm" fill="var(--accent-primary)" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3" fill="none" stroke="var(--accent-primary)" stroke-width="2"/></svg>
+          <div class="traction-stat" style="color: var(--accent-secondary);">dt1–dt5</div>
+          <div class="traction-label">Digital Twins</div>
+          <p class="traction-desc">Full-fidelity Gazebo + Isaac Sim environments, Sim2Real validated.</p>
+        </div>
+        
+        <div class="traction-card">
+          <div class="traction-icon">
+            <svg class="icon" fill="none" stroke="var(--accent-primary)" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          </div>
+          <svg class="traction-check icon-sm" fill="var(--accent-primary)" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3" fill="none" stroke="var(--accent-primary)" stroke-width="2"/></svg>
+          <div class="traction-stat">Zero</div>
+          <div class="traction-label">Re-Programming</div>
+          <p class="traction-desc">TorchScript distillation — new hardware boots pre-loaded, zero manual setup.</p>
+        </div>
+        
+        <div class="traction-card">
+          <div class="traction-icon">
+            <svg class="icon" fill="none" stroke="var(--accent-warm)" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          </div>
+          <svg class="traction-check icon-sm" fill="var(--accent-primary)" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3" fill="none" stroke="var(--accent-primary)" stroke-width="2"/></svg>
+          <div class="traction-stat" style="color: var(--accent-warm);">Live</div>
+          <div class="traction-label">Analytics Engine</div>
+          <p class="traction-desc">Real-time OEE, anomaly detection, predictive maintenance — production-ready.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Architecture Section -->
+  <section id="architecture">
+    <div class="container">
+      <div class="section-label">04 — Platform Architecture</div>
+      <h2 class="section-title">Four Layers.<br><span class="highlight">One Unified System.</span></h2>
+      <p class="section-desc">A full-stack industrial OS built for autonomous scale. Every layer is production-grade and open source.</p>
+      
+      <div class="arch-grid">
+        <div class="stack-layers">
+          <div class="layer green">
+            <div class="layer-header">
+              <span class="layer-name">Application Layer</span>
+              <span class="layer-tag">LAYER 04</span>
+            </div>
+            <div class="layer-items">
+              <span class="layer-item">Autonomous Factories</span>
+              <span class="layer-item">Logistics Fleets</span>
+              <span class="layer-item">Smart Facilities</span>
+              <span class="layer-item">Planetary Operations</span>
+            </div>
+          </div>
+          
+          <div class="layer purple">
+            <div class="layer-header">
+              <span class="layer-name">Intelligence Layer</span>
+              <span class="layer-tag">LAYER 03</span>
+            </div>
+            <div class="layer-items">
+              <span class="layer-item">Brian2 SNN · Neuromorphic AI</span>
+              <span class="layer-item">Google Cirq · Quantum Optimization</span>
+              <span class="layer-item">Predictive Maintenance</span>
+              <span class="layer-item">OEE Analytics</span>
+            </div>
+          </div>
+          
+          <div class="layer cyan">
+            <div class="layer-header">
+              <span class="layer-name">Platform Layer</span>
+              <span class="layer-tag">LAYER 02 · ROS2 + cBloom</span>
+            </div>
+            <div class="layer-items">
+              <span class="layer-item">70+ Production ROS2 Modules</span>
+              <span class="layer-item">Universal Control Plane</span>
+              <span class="layer-item">Self-Replicating Deploy</span>
+              <span class="layer-item">Digital Twin Suite (dt1–dt5)</span>
+            </div>
+          </div>
+          
+          <div class="layer orange">
+            <div class="layer-header">
+              <span class="layer-name">Hardware Layer</span>
+              <span class="layer-tag">LAYER 01</span>
+            </div>
+            <div class="layer-items">
+              <span class="layer-item">Robot Arms</span>
+              <span class="layer-item">CNC Machines</span>
+              <span class="layer-item">Autonomous Vehicles</span>
+              <span class="layer-item">Sensors & Facilities</span>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <div class="section-label" style="margin-bottom: 1.5rem;">Competitive Advantage</div>
+          <div class="compare-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Capability</th>
+                  <th style="color: var(--accent-primary);">cBloom</th>
+                  <th>Legacy</th>
+                  <th>Point AI</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Multi-Robot OS</td>
+                  <td class="yes">✓ Native</td>
+                  <td class="no">✗ Siloed</td>
+                  <td class="no">✗ None</td>
+                </tr>
+                <tr>
+                  <td>Neuromorphic AI</td>
+                  <td class="yes">✓ Brian2</td>
+                  <td class="no">✗ Rules</td>
+                  <td class="maybe">⚠ Cloud</td>
+                </tr>
+                <tr>
+                  <td>Quantum Optim.</td>
+                  <td class="yes">✓ Cirq</td>
+                  <td class="no">✗ None</td>
+                  <td class="no">✗ None</td>
+                </tr>
+                <tr>
+                  <td>Self-Replicating</td>
+                  <td class="yes">✓ Zero-touch</td>
+                  <td class="no">✗ Manual</td>
+                  <td class="no">✗ Manual</td>
+                </tr>
+                <tr>
+                  <td>Digital Twins</td>
+                  <td class="yes">✓ 5 Levels</td>
+                  <td class="maybe">⚠ Basic</td>
+                  <td class="maybe">⚠ Limited</td>
+                </tr>
+                <tr>
+                  <td>Open Source</td>
+                  <td class="yes">✓ GitHub</td>
+                  <td class="no">✗ Prop.</td>
+                  <td class="maybe">⚠ SaaS</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Market Section -->
+  <section id="market">
+    <div class="container">
+      <div class="section-label">05 — Market Opportunity</div>
+      <h2 class="section-title">Half a Trillion Dollars.<br><span class="highlight">The Window Is Open.</span></h2>
+      
+      <div class="market-stats">
+        <div class="market-card">
+          <div class="market-value" style="color: var(--accent-primary);">$500B+</div>
+          <div class="market-label">Global Automation Market 2030</div>
+          <div class="market-sub">Fastest-growing manufacturing sector</div>
+        </div>
+        <div class="market-card">
+          <div class="market-value" style="color: #FF6B6B;">$260K/hr</div>
+          <div class="market-label">Downtime Cost cBloom Eliminates</div>
+          <div class="market-sub">Per hour, per factory floor</div>
+        </div>
+        <div class="market-card">
+          <div class="market-value" style="color: var(--accent-secondary);">85M</div>
+          <div class="market-label">Jobs Automating by 2025</div>
+          <div class="market-sub">WEF — accelerating demand</div>
+        </div>
+        <div class="market-card">
+          <div class="market-value" style="color: var(--accent-tertiary);">3.4x</div>
+          <div class="market-label">ROI vs. Legacy Robotics</div>
+          <div class="market-sub">Adaptive systems outperform rigid ones</div>
+        </div>
+      </div>
+      
+      <div class="section-label" style="margin-top: 5rem;">Use Cases — Six Industries Ready Today</div>
+      
+      <div class="use-cases">
+        <div class="use-case">
+          <div class="use-case-header">
+            <h4>Precision Manufacturing</h4>
+            <div class="use-case-metric">
+              <div class="use-case-value">34%</div>
+              <div class="use-case-unit">Downtime Reduction</div>
+            </div>
+          </div>
+          <p>Self-correcting robot arms and CNC that predict failures and adjust toolpaths automatically.</p>
+        </div>
+        
+        <div class="use-case">
+          <div class="use-case-header">
+            <h4>Autonomous Logistics</h4>
+            <div class="use-case-metric">
+              <div class="use-case-value">2.8x</div>
+              <div class="use-case-unit">Throughput Gain</div>
+            </div>
+          </div>
+          <p>Quantum-optimized warehouse fleets that reroute, rebalance, and avoid collisions in real time.</p>
+        </div>
+        
+        <div class="use-case">
+          <div class="use-case-header">
+            <h4>Smart Facilities</h4>
+            <div class="use-case-metric">
+              <div class="use-case-value">28%</div>
+              <div class="use-case-unit">Energy Cost Reduction</div>
+            </div>
+          </div>
+          <p>HVAC, lighting, and security that learns building patterns and self-optimizes continuously.</p>
+        </div>
+        
+        <div class="use-case">
+          <div class="use-case-header">
+            <h4>Planetary Operations</h4>
+            <div class="use-case-metric">
+              <div class="use-case-value">∞</div>
+              <div class="use-case-unit">Scale</div>
+            </div>
+          </div>
+          <p>Self-replicating robot fleets for off-world construction, asteroid mining, and hazardous sites.</p>
+        </div>
+        
+        <div class="use-case">
+          <div class="use-case-header">
+            <h4>R&D & Digital Twins</h4>
+            <div class="use-case-metric">
+              <div class="use-case-value">10x</div>
+              <div class="use-case-unit">Faster Iteration</div>
+            </div>
+          </div>
+          <p>Full dt1–dt5 simulation suite — test every change virtually before touching real hardware.</p>
+        </div>
+        
+        <div class="use-case">
+          <div class="use-case-header">
+            <h4>Autonomous Vehicles</h4>
+            <div class="use-case-metric">
+              <div class="use-case-value">QPU</div>
+              <div class="use-case-unit">Path Planning</div>
+            </div>
+          </div>
+          <p>AV systems with brain-inspired perception and quantum path planning adapting to real conditions.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Founder Section -->
+  <section id="founder">
+    <div class="container">
+      <div class="section-label">06 — The Builder</div>
+      <h2 class="section-title">Built Entirely<br><span class="highlight">Independently.</span></h2>
+      <p class="section-desc">Every layer is production-quality and every line of code is live on GitHub.</p>
+      
+      <div class="founder-grid">
+        <div>
+          <div class="founder-avatar">
+            <div class="founder-avatar-inner">
+              <span>W</span>
+            </div>
+            <div class="online"></div>
+          </div>
+          
+          <h3 class="founder-name">Waleed Ahmad</h3>
+          <div class="founder-title">Founder & Systems Architect · cBloom</div>
+          <div class="founder-location">Brampton, ON · Open to accelerators · investors · partners</div>
+          
+          <p class="founder-bio">
+            Automation engineer and systems architect driving advanced AI and quantum computing into practical industrial applications. Built cBloom entirely independently — 70+ ROS2 modules, five digital-twin environments, neuromorphic AI, quantum optimization, and a complete self-replicating deployment pipeline.
+          </p>
+          
+          <div class="founder-quote">
+            <p>"I built this because no platform like it existed. Every layer is production-quality and every line of code is live on GitHub. I'm not pitching an idea — I'm looking for partners to scale what's already built."</p>
+          </div>
+          
+          <div class="founder-links">
+            <a href="https://github.com/bluehatwill3" target="_blank" rel="noopener">
+              <svg class="icon-sm" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+              github.com/bluehatwill3
+            </a>
+            <a href="https://huggingface.co/bluehatwill3" target="_blank" rel="noopener">
+              <svg class="icon-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+              huggingface.co/bluehatwill3
+            </a>
+          </div>
+        </div>
+        
+        <div>
+          <div class="skills-grid">
+            <div class="skill-card">
+              <div class="skill-cat">Robotics</div>
+              <div class="skill-tags">
+                <span class="skill-tag">ROS2</span>
+                <span class="skill-tag">Distributed Systems</span>
+                <span class="skill-tag">Multi-Robot Orchestration</span>
+                <span class="skill-tag">Swarm Control</span>
+              </div>
+            </div>
+            <div class="skill-card">
+              <div class="skill-cat">Neuromorphic / AI</div>
+              <div class="skill-tags">
+                <span class="skill-tag">Brian2 SNN</span>
+                <span class="skill-tag">PyTorch</span>
+                <span class="skill-tag">TorchScript</span>
+                <span class="skill-tag">ONNX</span>
+                <span class="skill-tag">CPG Controllers</span>
+              </div>
+            </div>
+            <div class="skill-card">
+              <div class="skill-cat">Quantum</div>
+              <div class="skill-tags">
+                <span class="skill-tag">Cirq</span>
+                <span class="skill-tag">qsimcirq</span>
+                <span class="skill-tag">Quantum Scheduling</span>
+                <span class="skill-tag">Routing Optimization</span>
+              </div>
+            </div>
+            <div class="skill-card">
+              <div class="skill-cat">Simulation</div>
+              <div class="skill-tags">
+                <span class="skill-tag">Digital Twin dt1–dt5</span>
+                <span class="skill-tag">Gazebo</span>
+                <span class="skill-tag">Isaac Sim</span>
+                <span class="skill-tag">Sim2Real</span>
+              </div>
+            </div>
+            <div class="skill-card">
+              <div class="skill-cat">Industrial</div>
+              <div class="skill-tags">
+                <span class="skill-tag">OEE Analytics</span>
+                <span class="skill-tag">Predictive Maintenance</span>
+                <span class="skill-tag">Safety Governance</span>
+                <span class="skill-tag">CAN/I2C/SPI</span>
+              </div>
+            </div>
+            <div class="skill-card">
+              <div class="skill-cat">Engineering</div>
+              <div class="skill-tags">
+                <span class="skill-tag">Python</span>
+                <span class="skill-tag">Docker</span>
+                <span class="skill-tag">GitHub Actions</span>
+                <span class="skill-tag">Real-time Control</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="awards">
+            <div class="section-label" style="margin-bottom: 1rem;">Recognition & Awards</div>
+            <div class="award">
+              <div class="award-icon">
+                <svg class="icon" fill="none" stroke="var(--accent-warm)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12"/></svg>
+              </div>
+              <div>
+                <div class="award-title">Trendsetters To Watch Award</div>
+                <div class="award-org">FUELD Conference USA · Spring 2025</div>
+                <span class="award-badge">Nominee</span>
+              </div>
+            </div>
+            <div class="award">
+              <div class="award-icon">
+                <svg class="icon" fill="none" stroke="var(--accent-warm)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12"/></svg>
+              </div>
+              <div>
+                <div class="award-title">Outstanding Leadership Award</div>
+                <div class="award-org">Internet 2.0 Conference USA · March 2024</div>
+                <span class="award-badge">Nominee</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Roadmap Section -->
+  <section id="roadmap">
+    <div class="container">
+      <div class="section-label">07 — Roadmap</div>
+      <h2 class="section-title">Prototype → Pilots<br><span class="highlight">→ Production → Platform.</span></h2>
+      
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot complete">
+            <svg class="icon" fill="none" stroke="var(--accent-primary)" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+          </div>
+          <div class="timeline-phase">NOW</div>
+          <h4 class="timeline-title">Prototype Live</h4>
+          <ul class="timeline-list">
+            <li>70+ ROS2 modules on GitHub</li>
+            <li>Brian2 SNN nodes running</li>
+            <li>dt1–dt5 digital twin suite</li>
+            <li>Self-replicating deploy pipeline</li>
+          </ul>
+        </div>
+        
+        <div class="timeline-item">
+          <div class="timeline-dot active">
+            <svg class="icon" fill="none" stroke="var(--accent-secondary)" stroke-width="2" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09zM12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+          </div>
+          <div class="timeline-phase">Q3 2025</div>
+          <h4 class="timeline-title">Hardware Pilots</h4>
+          <ul class="timeline-list">
+            <li>First factory floor pilots</li>
+            <li>CNC + robot arm integration</li>
+            <li>Sensor fusion SDK release</li>
+            <li>Partner program launch</li>
+          </ul>
+        </div>
+        
+        <div class="timeline-item">
+          <div class="timeline-dot upcoming">
+            <svg class="icon" fill="none" stroke="var(--accent-tertiary)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+          </div>
+          <div class="timeline-phase">Q1 2026</div>
+          <h4 class="timeline-title">Quantum + Cloud</h4>
+          <ul class="timeline-list">
+            <li>Real QPU connections</li>
+            <li>cBloom Cloud (SaaS) beta</li>
+            <li>Fleet analytics dashboard</li>
+            <li>Series-A close</li>
+          </ul>
+        </div>
+        
+        <div class="timeline-item">
+          <div class="timeline-dot future">
+            <svg class="icon" fill="none" stroke="var(--accent-warm)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          </div>
+          <div class="timeline-phase">2027+</div>
+          <h4 class="timeline-title">Platform Scale</h4>
+          <ul class="timeline-list">
+            <li>Self-replicating fleet deploy</li>
+            <li>OEM licensing revenue</li>
+            <li>Off-world operations</li>
+            <li>Autonomous economies</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="section-label" style="margin-top: 5rem;">Business Model — Three Revenue Streams</div>
+      
+      <div class="biz-grid">
+        <div class="biz-card">
+          <h4 class="biz-title">Platform Licensing</h4>
+          <div class="biz-sub">Enterprise + OEM</div>
+          <p class="biz-desc">Annual site licenses for factories and robotics integrators. OEM licensing for hardware manufacturers. Open-core model.</p>
+        </div>
+        <div class="biz-card">
+          <h4 class="biz-title">cBloom Cloud</h4>
+          <div class="biz-sub">SaaS Analytics</div>
+          <p class="biz-desc">Subscription access to hosted digital twin simulation, fleet telemetry dashboards, and OEE analytics. Usage-based pricing.</p>
+        </div>
+        <div class="biz-card">
+          <h4 class="biz-title">Integration Services</h4>
+          <div class="biz-sub">Deployment & Support</div>
+          <p class="biz-desc">Paid deployment, on-site commissioning, and ongoing support contracts. High-margin recurring revenue.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact">
+    <div class="container">
+      <div class="contact-header">
+        <div class="section-label" style="justify-content: center;">08 — The Ask</div>
+        <h2 class="section-title">The Prototype Is Live.<br><span class="highlight">The Market Is Waiting.</span></h2>
+        <p class="section-desc">cBloom is open source, fully documented, and deployed. We're looking for hardware partners, accelerator programs, and investors who understand that the future of automation is adaptive, self-replicating, and already built.</p>
+      </div>
+      
+      <div class="asks-grid">
+        <div class="ask-card">
+          <div class="ask-icon">
+            <svg class="icon-lg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 20a2 2 0 002 2h16a2 2 0 002-2V8l-7 5V8l-7 5V4a2 2 0 00-2-2H4a2 2 0 00-2 2z"/></svg>
+          </div>
+          <h4 class="ask-title">Hardware Partners</h4>
+          <div class="ask-sub">Precision Manufacturing & Logistics</div>
+          <ul class="ask-list">
+            <li>Pilot deployment on live factory hardware</li>
+            <li>CNC + robot arm integration partners</li>
+            <li>AV fleet operators for quantum routing trials</li>
+          </ul>
+        </div>
+        
+        <div class="ask-card">
+          <div class="ask-icon">
+            <svg class="icon-lg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09zM12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z"/></svg>
+          </div>
+          <h4 class="ask-title">Accelerator Programs</h4>
+          <div class="ask-sub">Deep-tech & Industrial AI Tracks</div>
+          <ul class="ask-list">
+            <li>12–24 week program with hardware lab access</li>
+            <li>Mentorship: industrial AI, ROS2, go-to-market</li>
+            <li>Bridge to Series-A investors and OEM partners</li>
+          </ul>
+        </div>
+        
+        <div class="ask-card">
+          <div class="ask-icon">
+            <svg class="icon-lg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 6l-9.5 9.5-5-5L1 18M17 6h6v6"/></svg>
+          </div>
+          <h4 class="ask-title">Seed / Series-A Investment</h4>
+          <div class="ask-sub">$500K–$2M Target Raise</div>
+          <ul class="ask-list">
+            <li>Build core engineering team (3–5 hires)</li>
+            <li>Hardware validation lab & certification</li>
+            <li>Sales infrastructure & first enterprise contracts</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="contact-box">
+        <div class="section-label" style="justify-content: center; margin-bottom: 1rem;">Direct Contact</div>
+        <h3>Let's Build Something Together</h3>
+        <div class="contact-links">
+          <a href="mailto:bluehatwill3@gmail.com">
+            <svg class="icon-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
+            bluehatwill3@gmail.com
+          </a>
+          <a href="tel:+14164574775">
+            <svg class="icon-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+            +1 (416) 457-4775
+          </a>
+          <a href="https://github.com/bluehatwill3" target="_blank" rel="noopener">
+            <svg class="icon-sm" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+            github.com/bluehatwill3
+          </a>
+          <a href="https://huggingface.co/bluehatwill3" target="_blank" rel="noopener">
+            <svg class="icon-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+            huggingface.co/bluehatwill3
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-logo">
+          <div class="footer-logo-mark">c</div>
+          <span>cBloom</span>
+          <small>Autonomous Industrial OS</small>
+        </div>
+        
+        <div class="footer-links">
+          <a href="https://github.com/bluehatwill3" target="_blank" rel="noopener">
+            <svg class="icon-sm" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+            GitHub
+          </a>
+          <a href="https://huggingface.co/bluehatwill3" target="_blank" rel="noopener">
+            <svg class="icon-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+            Hugging Face
+          </a>
+          <a href="mailto:bluehatwill3@gmail.com">Contact</a>
+        </div>
+        
+        <div class="footer-status">
+          <div class="pulse"></div>
+          <span>Prototype Live · Open Source · Seeking Partners</span>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>© 2025 cBloom · Built by Waleed Ahmad · github.com/bluehatwill3</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Navbar scroll effect
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    // Intersection Observer for animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    // Observe all cards and sections for scroll animations
+    document.querySelectorAll('.problem-card, .pillar, .traction-card, .layer, .market-card, .use-case, .timeline-item, .biz-card, .ask-card, .skill-card, .award').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(30px)';
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>
